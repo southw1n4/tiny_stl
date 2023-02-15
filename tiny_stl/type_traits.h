@@ -1,5 +1,5 @@
-//#ifndef TYPE_TRAITS_H__
-//#define TYPE_TRAITS_H__
+#ifndef TYPE_TRAITS_H__
+#define TYPE_TRAITS_H__
 //
 
 
@@ -125,4 +125,4 @@ namespace tiny_stl{
     };
 };
 
-//#endif //type_traits
+#endif //type_traits

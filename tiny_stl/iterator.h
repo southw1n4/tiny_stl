@@ -1,5 +1,5 @@
-//#ifndef ITERATOR_H__
-//#define ITERATOR_H__
+#ifndef ITERATOR_H__
+#define ITERATOR_H__
 
 #include <cstddef>
 
@@ -70,7 +70,56 @@ namespace tiny_stl{
     value_type(const Iterator&){
         return static_cast<typename iterator_traits<Iterator>::value_type*>(0);
     }
+
+    template<class InputIterator>
+    inline typename iterator_traits<InputIterator>::difference_type
+    __distance(InputIterator first, InputIterator lsat, input_iterator_tag){
+        typename iterator_traits<InputIterator>::difference_type n = 0;
+        while(first != n) {
+            ++first, ++ n; 
+        }
+
+        return n;
+    }
+
+    template<class RandomAccessIterator>
+    inline typename iterator_traits<RandomAccessIterator>::difference_type
+    __distance(RandomAccessIterator first, RandomAccessIterator last, random_access_iterator_tag){
+        return last - first;
+    }
+
+    template<class InputIterator>
+    inline typename iterator_traits<InputIterator>::difference_type
+    distance(InputIterator first, InputIterator last){
+        typedef typename iterator_traits<InputIterator>::iterator_category category;
+        return __distance(first, last,  category());
+    }
+
+    template<class InputIterator, class Distance>
+    inline void __advance(InputIterator& it, Distance n, input_iterator_tag){
+        while(n --) ++ it;
+    }
+
+    template<class BidirectionalIterator, class Distance>
+    inline void __advance(BidirectionalIterator& it, Distance n, bidirectional_iterator_tag){
+        if(n > 0)
+            while(n --) ++ it;
+        else 
+            while(n ++) -- it;
+    }
+
+    template<class RandomAccessIterator, class Distance>
+    inline void __advance(RandomAccessIterator& it, Distance n, random_access_iterator_tag){
+        it += n;
+    }
+
+    template<class InputIterator, class Distance>
+    inline void advancd(InputIterator& it, Distance n){
+        typedef typename iterator_traits<InputIterator>::iterator_category category;
+        return __advance(it, n, iterator_category(it));
+    }
+    
 }
 
-//#endif  //iterator
+#endif  //iterator
 

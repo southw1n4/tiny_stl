@@ -1,5 +1,5 @@
-//#ifndef __ALLOC_H__
-//#define __ALLOC_H__
+#ifndef __ALLOC_H__
+#define __ALLOC_H__
 //
 
 #if 0
@@ -249,7 +249,7 @@ char* __default_alloc_template<threads, inst>::chunk_alloc(size_t size, int& nob
     if(bytes_left > 0) {
         obj* volatile * my_free_list = free_lists + FREELIST_INDEX(bytes_left);
         ((obj*)start_free)->free_list_link = *my_free_list;
-        my_free_list = (obj*) start_free;
+        *my_free_list = (obj*) start_free;
     }
 
     start_free = (char *)malloc(bytes_to_get);
@@ -309,4 +309,4 @@ class simple_alloc{
 } // namespace tiny_stl
 
 
-//#endif // alloc
+#endif // alloc
