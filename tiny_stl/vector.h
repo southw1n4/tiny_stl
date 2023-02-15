@@ -55,8 +55,8 @@ class vector{
      void insert_aux(iterator pos, size_type n, const T& x);
  
  public:
-     iterator begin() {return start;}
-     iterator end() {return finish;}
+     iterator begin() const {return start;}
+     iterator end() const {return finish;}
      size_type size() const { return size_type(finish - start);}
      size_type capacity() const {return size_type(end_of_storage - start);}
      bool empty() const {return begin() == end();}
@@ -66,6 +66,24 @@ class vector{
      explicit vector(size_type n){fill_initialize(n, T());}
      vector(int n, const T& value){fill_initialize(n, value);}
      vector(size_type n, const T& value){fill_initialize(n, value);}
+     vector(const vector<T>& rhs){
+         iterator result = data_allocator::allocate(rhs.capacity());
+         finish = uninitialized_copy(rhs.begin(), rhs.end(), result);
+
+         start = result;
+         end_of_storage = start + rhs.capacity();
+
+     }
+     template<class Iterator>
+     vector(Iterator first, Iterator last) {
+         size_type n = distance(first, last);
+         start = data_allocator::allocate(n);
+
+         uninitialized_copy(first, last, start);
+
+         finish = start + n;
+         end_of_storage = finish;
+     }
 
      ~vector(){
          destory(start, finish);
@@ -127,6 +145,7 @@ class vector{
      void clear(){erase(begin(), end());}
 
 };
+
 template<class T, class Alloc>
 void vector<T, Alloc>::insert_aux(iterator pos, size_type n, const T& x){
     if(n <= 0) return ;
