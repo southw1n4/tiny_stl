@@ -23,11 +23,13 @@ TEST(TinySTLTest, VectorTest){
     v1.pop_back();
     tiny_stl::vector<int> v3(v2);
     tiny_stl::vector<int> v4(v3);
-    tiny_stl::vector<int> v5(v1);
+    tiny_stl::vector<int> v5 = v1;
     tiny_stl::vector<int> v6(arr, arr + 5);
+    tiny_stl::vector<int> v7(v6.begin(), v6.end());
     v3[0] = 3;
     v4.insert(v4.begin(), 100, 1);
     v5.erase(v5.begin() + 2, v5.begin() + 4);
+    v7.reverse();
 
     EXPECT_EQ(v1[2], 3);
     EXPECT_EQ(v1.size(), 5);
@@ -57,6 +59,13 @@ TEST(TinySTLTest, VectorTest){
     EXPECT_EQ(v6[3], 9);
     EXPECT_EQ(v6[4], 10);
 
+    EXPECT_EQ(v7.size(), 5);
+    EXPECT_EQ(v7.capacity(), 5);
+    EXPECT_EQ(v7[0], 10);
+    EXPECT_EQ(v7[1], 9);
+    EXPECT_EQ(v7[2], 8);
+    EXPECT_EQ(v7[3], 7);
+    EXPECT_EQ(v7[4], 6);
 }
 
 } //vector

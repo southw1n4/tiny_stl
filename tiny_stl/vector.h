@@ -61,6 +61,7 @@ class vector{
      size_type capacity() const {return size_type(end_of_storage - start);}
      bool empty() const {return begin() == end();}
      reference operator[](size_type n) {return *(begin() + n);}
+     pointer data(){ return start;}
 
      vector():start(0), finish(0), end_of_storage(0){};
      explicit vector(size_type n){fill_initialize(n, T());}
@@ -83,6 +84,23 @@ class vector{
 
          finish = start + n;
          end_of_storage = finish;
+     }
+
+     vector<T>& operator=(const vector<T>& rhs) {
+         if(this == &rhs){
+             return *this;
+         } 
+
+         destory(start, finish);
+         deallocate();
+
+         iterator result = data_allocator::allocate(rhs.capacity());
+         finish = uninitialized_copy(rhs.begin(), rhs.end(), result);
+
+         start = result;
+         end_of_storage = start + rhs.capacity();
+
+         return *this;
      }
 
      ~vector(){
@@ -141,6 +159,11 @@ class vector{
      }
 
      void resize(size_type new_sz) {resize(new_sz, T());}
+
+     void reverse() {
+         for(int i = 0, j = size() - 1; i < j; ++ i, -- j)
+            swap(*(start + i), *(start + j));
+     }
 
      void clear(){erase(begin(), end());}
 
