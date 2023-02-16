@@ -152,12 +152,27 @@ class string{
      size_type size() const {return size_;}
      iterator begin() {return buffer_;}
      iterator end() {return buffer_ + size_;}
+     bool empty() {return size_ == 0;}
+     void clear(){
+         destory(buffer_, buffer_ + size_);
+         size_ = 0;
+     };
 
      reference front(){return *buffer_;}
      reference back(){return *(buffer_ + size_ - 1);}
      reference operator[](size_type n) {return *(buffer_ + n);}
      const_reference operator[](size_type n) const {return *(buffer_ + n);}
      pointer data() {return buffer_;}
+
+     string& append(const_pointer c_str){
+         *this += c_str;
+         return *this;
+     }
+
+     string& append(const string& rhs){
+         *this += rhs;
+         return *this;
+     }
 
      void push_back(const char& value){
          if(size_ >= capacity_) {
