@@ -40,7 +40,7 @@ struct __list_iterator{
      __list_iterator(const iterator& x):node(x.node){}
 
      bool operator==(const self& x){return node == x.node;}
-     bool operator!=(const self& x){return node != x.ndoe;}
+     bool operator!=(const self& x){return node != x.node;}
 
      reference operator*(){return (*node).data;}
      pointer  operator->(){return &(operator*());}
@@ -94,7 +94,7 @@ class list{
 
      node_pointer create_node(const T& x) {
          node_pointer p = get_node();
-         construct(p->data, x);
+         construct(&p->data, x);
 
          return p;
      }
@@ -108,12 +108,14 @@ class list{
          node_ = get_node();
          node_->next = node_;
          node_->prev = node_;
-         size_ = 0;
      }
 
+     void __sort();
+
+
  private:
-     size_type size_;
      node_pointer node_;
+     bool(*cmp_)(const T&, const T&) = nullptr;
 
  public:
      list() {empty_initialize();}
@@ -125,8 +127,21 @@ class list{
 
      iterator begin(){return (*node_).next;}
      iterator end(){return node_;}
-     bool empty(){return size_ == 0;}
-     size_type size(){return size_;}
+     iterator begin()const {return (*node_).next;}
+     iterator end()const{return node_;}
+     bool empty(){return begin() == end();}
+     size_type size(){
+         size_type n = 0;
+         iterator first = begin();
+         iterator last = end();
+
+         while(first != last){
+             ++first;
+             ++ n;
+         }
+
+         return n;
+     }
 
      reference front(){return *begin();}
      reference back(){return *(--end());}
@@ -146,17 +161,21 @@ class list{
      void merge(list<T, Alloc>& x);
      void reverse();
      void sort(bool(*)(const T& a, const T&) = nullptr);
+     void transfer(iterator pos, iterator first, iterator last);
 
 };
 
 template<class T, class Alloc>
 void list<T, Alloc>::clear() {
-    while(size_ --){
-        node_pointer tmp = node_->next;
-        node_->next = tmp->next;
-        tmp->next->prev = node_;
+    while(node_->next != node_){
+        node_pointer tmp = node_;
+        node_ = node_->next;
+        tmp->prev->next = node_;
+        node_->prev = tmp->prev;
+
 
         destory_node(tmp);
+
     }
 
 }
@@ -170,6 +189,7 @@ void list<T, Alloc>::insert(iterator pos, const T& x) {
 
     tmp->prev->next = tmp;
     tmp->next->prev = tmp;
+
 }
 
 template<class T, class Alloc>
@@ -181,42 +201,141 @@ typename list<T, Alloc>::iterator list<T, Alloc>::erase(iterator pos){
     tmp->prev->next = tmp->next;
 
     destory_node(tmp);
-    size_ --;
 
-    return next;
+    return iterator(next);
 }
 
 template<class T, class Alloc>
 void list<T, Alloc>::remove(const T& x){
-    for(iterator it = begin(); it != end(); ++ it) {
-        if(*it == x)
-            erase(it);
+    iterator first = begin();
+    iterator last = end();
+
+    while(first != last) {
+        if(*first == x) {
+            first = erase(first);
+            continue;
+        }
+
+        ++ first;
     }
 }
 
 template<class T, class Alloc>
 void list<T, Alloc>::unique(){
+    iterator first = begin();
+
+    while(first != end()){
+        iterator next = ++ first;
+        while(next != end() &&  *next == *first) {
+            next = erase(next);
+            std::cout << *this << std::endl;
+        }
+
+        first = next;
+    }
 
 }
 
 template<class T, class Alloc>
 void list<T, Alloc>::splice(iterator pos, list<T, Alloc>& x){
+    if(!x.empty()){
+        transfer(pos, x.begin(), x.end());
+    }
 
 }
 
 template<class T, class Alloc>
 void list<T, Alloc>::merge(list<T, Alloc>& rhs){
+    iterator first1 = begin();
+    iterator last1  = begin();
+    iterator first2 = rhs.begin();
+    iterator last2 = rhs.end();
+
+
+    while(first1 != last1 && first2 != last2){
+        if(*first1 < *first2) {
+            iterator next = first2;
+            transfer(first1, first2, ++ next);
+
+            first2 = next;
+        }else {
+            ++ first1;
+        }
+
+        if(first2 != last2) transfer(last1, first2, last2);
+    }
 
 }
 
 template<class T, class Alloc>
 void list<T, Alloc>::reverse(){
 
+    iterator first = begin();
+    ++ first;
+
+    while(first != end()){
+        iterator old = first;
+        ++ first;
+
+        transfer(begin(), old, first);
+    }
 }
 
 template<class T, class Alloc>
 void list<T, Alloc>::sort(bool(*cmp)(const T&, const T&)){
+    if(cmp == nullptr) {
+        cmp = [](const T& a, const T& b) {
+            return a < b;
+        };
+    }
+
+    cmp_ = cmp;
+
+    __sort();
+
 }
+
+template<class T, class Alloc>
+void list<T, Alloc>::transfer(iterator pos, iterator first, iterator last){
+    if(pos == last) return ;
+    node_pointer tmp =  last.node->prev;
+
+    last.node->prev = first.node->prev;
+    first.node->prev->next = last.node;
+
+    pos.node->prev->next = first.node;
+    tmp->next = pos.node;
+    first.node->prev = pos.node->prev;
+    pos.node->prev = tmp;
+
+}
+
+template<class T, class Alloc>
+void list<T, Alloc>::__sort(){
+
+    iterator first = ++ begin(); 
+    iterator last = end();
+
+    while(first != last) {
+        iterator tmp = first ++;
+        iterator pos = begin();
+
+        while(pos != tmp && !cmp_(*tmp, *pos)) ++ pos;
+
+        if(pos != tmp)
+            transfer(pos, tmp, first);
+    }
+}
+
+template<class T, class Alloc>
+std::ostream& operator<<(std::ostream& o, const list<T, Alloc>& s) {
+    for(auto it = s.begin(); it != s.end(); ++ it) {
+        o << *it << " ";
+    }
+
+    return o;
+}
+
 }
 
 #endif // LIST_H__

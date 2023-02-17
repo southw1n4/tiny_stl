@@ -3,7 +3,7 @@
 
 
 #include "gtest/gtest.h"
-#include "../tiny_stl/tstring.h"
+#include "tstring.h"
 
 namespace tiny_stl{
 namespace test{
