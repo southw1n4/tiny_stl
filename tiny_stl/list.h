@@ -162,6 +162,7 @@ class list{
      void reverse();
      void sort(bool(*)(const T& a, const T&) = nullptr);
      void transfer(iterator pos, iterator first, iterator last);
+     iterator find(const T& x);
 
 };
 
@@ -225,10 +226,11 @@ void list<T, Alloc>::unique(){
     iterator first = begin();
 
     while(first != end()){
-        iterator next = ++ first;
+        iterator next = first;
+        ++ next;
+
         while(next != end() &&  *next == *first) {
             next = erase(next);
-            std::cout << *this << std::endl;
         }
 
         first = next;
@@ -310,6 +312,19 @@ void list<T, Alloc>::transfer(iterator pos, iterator first, iterator last){
 
 }
 
+template<class T, class Alloc>
+typename list<T, Alloc>::iterator list<T, Alloc>::find(const T& x){
+    iterator first = begin();
+    iterator last = end();
+
+    while(first != last){
+        if(*first == x) return first;
+
+        ++ first;
+    }
+
+    return last;
+}
 template<class T, class Alloc>
 void list<T, Alloc>::__sort(){
 
