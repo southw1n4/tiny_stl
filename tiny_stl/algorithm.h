@@ -29,6 +29,15 @@ namespace tiny_stl{
         return cur;
     }
 
+    template<class InputIterator, class ForwardIterator>
+    inline ForwardIterator copy_backward(InputIterator first, InputIterator last, ForwardIterator result) {
+        while(last != first) 
+            *( -- result) = *(-- last);
+
+        return result;
+    }
+
+
     template<class T>
     inline const T& max(const T& a, const T& b){
         return (a < b) ? b : a;

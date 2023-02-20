@@ -2,8 +2,8 @@
 #define TEST_LIST_H__
 
 #include "gtest/gtest.h"
-#include "../tiny_stl/list.h"
-#include "../tiny_stl/vector.h"
+#include "list.h"
+#include "vector.h"
 
 namespace tiny_stl{
 namespace test{
