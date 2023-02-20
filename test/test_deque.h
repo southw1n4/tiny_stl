@@ -2,7 +2,7 @@
 #define TEST_DEQUE_H__
 
 #include "gtest/gtest.h"
-#include "../tiny_stl/deque.h"
+#include "deque.h"
 
 namespace tiny_stl {
 namespace test{
