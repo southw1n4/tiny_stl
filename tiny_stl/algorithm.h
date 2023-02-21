@@ -54,6 +54,61 @@ namespace tiny_stl{
         lhs = rhs;
         rhs = tmp;
     }
+
+    template<class RandomAccessIterator, class Compare, class Distance>
+    void __make_heap_aux(RandomAccessIterator first,
+                         RandomAccessIterator last,
+                         RandomAccessIterator root,
+                         Compare cmp, 
+                         Distance*) {
+        typedef Distance difference_type;
+
+        difference_type offset = root - first;
+
+        RandomAccessIterator tmp = root;
+        RandomAccessIterator l = first + offset * 2;
+        RandomAccessIterator r = first + offset * 2 + 1;
+
+        if(l < last && cmp(*tmp, *l)) tmp = l;
+        if(r < last && cmp(*tmp, *r)) tmp = r;
+
+        if(tmp != root) {
+            swap(*tmp, *(first + offset));
+            __make_heap_aux(first, last, tmp, cmp, distance_type(first));
+        }
+    }
+
+
+
+    template<class RandomAccessIterator, class Compare, class Distance>
+    void __make_heap(RandomAccessIterator first, RandomAccessIterator last, Compare cmp, Distance*) {
+        typedef Distance difference_type;
+
+        difference_type n = last - first;
+
+        for(difference_type offset = n / 2; offset >= 0; -- offset) {
+            RandomAccessIterator tmp = first + offset;
+            RandomAccessIterator l = first + offset * 2;
+            RandomAccessIterator r = first + offset * 2 + 1;
+
+            if(l < last && cmp(*tmp, *l)) tmp = l;
+            if(r < last && cmp(*tmp, *r)) tmp = r;
+
+            if(tmp != offset + first) {
+                swap(*tmp, *(first + offset));
+                __make_heap_aux(first, last, tmp, cmp, distance_type(first));
+            }
+        }
+
+    }
+
+    template<class RandomAccessIterator, class Compare>
+    void make_heap(RandomAccessIterator first, RandomAccessIterator last, Compare cmp){
+        __make_heap(first, last, cmp, distance_type(first));
+    }
+
+
+
 }
 
 #endif
