@@ -171,7 +171,7 @@ class rb_tree{
 
      node_pointer& root() const {return (node_pointer&) header_->parent;}
      node_pointer& left_most() const {return (node_pointer&) header_->left;}
-     node_pointer right_most() const {return (node_pointer&) header_->right;}
+     node_pointer& right_most() const {return (node_pointer&) header_->right;}
 
      static node_pointer& left(node_pointer x) {return (node_pointer&)(x->left);}
      static node_pointer& right(node_pointer x) {return (node_pointer&)(x->right);}
@@ -512,17 +512,149 @@ rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::__copy(node_pointer x) {
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::__erase_node(node_pointer x) {
-    /*TODO
-     *
-     */
+    if(x->left == nullptr && x->right == nullptr) {
+        if(x->color == __rb_tree_red){
+            if(left_most() == x)
+                left_most() = (node_pointer)x->parent;
+            else if(right_most() == x)
+                right_most() = (node_pointer)x->parent;
+        }
+        else {
+            if(root() == x) {
+                root() = nullptr;
+                left_most() = header_;
+                right_most() = header_;
+            }
+            else {
+                __erase_node_case2_reblance(x);
+                if(left_most() == x)
+                    left_most() = (node_pointer)x->parent;
+                if(right_most() == x)
+                    right_most() = (node_pointer)x->parent;
+            }
+        }
+
+        if(x->parent->left == x)
+            x->parent->left = nullptr;
+        else 
+            x->parent->right = nullptr;
+    }
+    else if(x->left == nullptr) {
+        node_pointer son = x->right;
+        son->parent = x->parent;
+        son->color = __rb_tree_black;
+
+        if(x->parent->left == x)
+            x->parent->left = son;
+        else
+            x->parent->right = son;
+
+        if(root() == x) {
+            root() = son;
+        }
+        if(left_most() == x)
+            left_most() = son;
+
+        destory_node(x);
+        -- node_count_;
+    }
+    else if(x->right == nullptr) {
+        node_pointer son = x->let;
+        son->parent = x->parent;
+        son->color = __rb_tree_black;
+
+        if(x->parent->left == x)
+            x->parent->left = son;
+        else
+            x->parent->right = son;
+
+        if(root() == x){
+            root() = son;
+        }
+        if(right_most() == x)
+            right_most() = son;
+
+        destory_node(x);
+        -- node_count_;
+    }
+    else {
+        iterator it = iterator(x);
+        ++ it;
+
+        memmove(&(x->value_field), &(((node_pointer)it.node)->value_field), sizeof(x->value_field));
+
+        __erase((node_pointer)it.node);
+    }
+
 }
 
 
 template<class Key, class Value, class KeyOfValue, class Compare, class Alloc>
 void rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::__erase_node_case2_reblance(node_pointer x) {
-    /*TODO
+    node_pointer brother = (node_pointer)x->get_brother();
+    if(brother->color == __rb_tree_black) {
+        if((brother->left && brother->left->color == __rb_tree_red) ||
+           (brother->right && brother->right->color == __rb_tree_red)){
+            if(brother == x->parent->right) {
+                if(brother->right != nullptr) {
+                    __rb_tree_rotate_left(x->parent, header_->parent);
+                    brother->right->color = __rb_tree_black;
+                    brother->color = x->parent->color;
+                    x->parent->color = __rb_tree_black;
+                }
+                else {
+                    __rb_tree_rotate_right(brother, header_->parent);
+                    brother->color = __rb_tree_red;
+                    brother->parent->color = __rb_tree_black;
 
-      */
+                    __erase_node_case2_reblance(x);
+                }
+            }
+            else {
+                if(brother->left != nullptr) {
+                    __rb_tree_rotate_right(x->parent, header_->parent);
+                    brother->left->color = __rb_tree_black;
+                    brother->color = x->parent->color;
+                    x->parent->color = __rb_tree_black;
+                }
+                else {
+                    __rb_tree_rotate_left(brother, header_->parent);
+                    brother->color = __rb_tree_red;
+                    brother->parent->color = __rb_tree_black;
+
+                    __erase_node_case2_reblance(x);
+                }
+            }
+        }
+        else {
+            if(x == root())
+                return ;
+
+            if(x->parent->color == __rb_tree_red){
+                x->parent->color = __rb_tree_black;
+                brother->color = __rb_tree_red;
+            }
+            else {
+                brother->color = __rb_tree_red;
+            }
+
+            __erase_node_case2_reblance((node_pointer)x->parent);
+
+        }
+    }else {
+        if(brother == x->parent->right)  {
+            __rb_tree_rotate_left(x->parent, header_->parent);
+        }
+        else {
+            __rb_tree_rotate_right(x->parent, header_->parent);
+
+        }
+
+        brother->color = __rb_tree_black;
+        x->parent->color = __rb_tree_red;
+
+        __erase_node_case2_reblance(x);
+    }
 }
 
 inline void __rb_tree_rotate_left(__rb_tree_node_base* x, __rb_tree_node_base*& root) {

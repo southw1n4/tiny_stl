@@ -5,6 +5,7 @@
 #include "test_stack.h"
 #include "test_queue.h"
 #include "test_priority_queue.h"
+#include "test_rb_tree.h"
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);

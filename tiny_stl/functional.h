@@ -10,6 +10,14 @@ class less{
          return a < b;
      };
 };
+
+template<class T>
+class Identity{
+ public:
+     T operator()(const T& val){
+         return val;
+     };
+};
 }
 
 #endif
